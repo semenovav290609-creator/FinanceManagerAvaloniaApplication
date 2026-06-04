@@ -1,0 +1,173 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:AvaloniaApplication1.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="AvaloniaApplication1.Views.MainWindow"
+        Icon="/Assets/avalonia-logo.ico"
+        Title="AvaloniaApplication1">
+
+
+    <Design.DataContext>
+        <vm:MainWindowViewModel/>
+    </Design.DataContext>
+
+    <!-- Главный вертикальный контейнер -->
+    <StackPanel VerticalAlignment="Top" Spacing="15">
+
+        <!-- Главный заголовок -->
+        <TextBlock TextAlignment="Center"
+                   FontSize="40"
+                   Text="Менеджер финансов"
+                   FontStyle="Oblique"
+                   Background="#1E293B"
+                   Foreground="White"/>
+
+        <!-- Блок баланса и трат (на одной строке) -->
+        <Grid Margin="15,0,15,0">
+            <!-- Левый блок: Общий баланс -->
+            <TextBlock HorizontalAlignment="Left"
+                       TextAlignment="Left"
+                       Text="Общий баланс 0₽"
+                       FontSize="32"
+                       Background="#E8F8F5"
+                       Foreground="#117A65"
+                       Name="balance"/>
+
+            <!-- Правый блок: Итого потрачено -->
+            <TextBlock Text="Итого потрачено 0₽"
+                       HorizontalAlignment="Right"
+                       TextAlignment="Left"
+                       FontSize="28"
+                       Background="#FADBD8"
+                       Foreground="#78281F"
+                       Name="TotalSpent"/>
+        </Grid>
+
+        <!-- Основная рабочая сетка из трех колонок -->
+        <Grid Margin="15,0,15,0" VerticalAlignment="Top">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="280"/> <!-- Левая колонка под добавление трат -->
+                <ColumnDefinition Width="*"/>   <!-- Центральная колонка под историю -->
+                <ColumnDefinition Width="280"/> <!-- Правая колонка под пополнение баланса -->
+            </Grid.ColumnDefinitions>
+
+            <!-- ЛЕВАЯ КОЛОНКА: Все поля ввода внутри черной рамки -->
+            <Border Grid.Column="0"
+                    BorderBrush="#CBD5E1"
+                    BorderThickness="1"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Top"
+                    Padding="10">
+                <StackPanel Spacing="10">
+                    <TextBlock Text="Добавить новую трату"
+                               FontSize="21"
+                               HorizontalAlignment="Center"
+                               FontWeight="Bold"
+                               Margin="0,0,0,5"/>
+
+                    <TextBox Watermark="Название траты"
+                             HorizontalAlignment="Stretch"
+                             Name="NameWaste"/>
+
+                    <!-- Исправлено: убрали Watermark, который ломал сборку -->
+                    <NumericUpDown Name="Price"
+                                   Minimum="0"
+                                   Increment="10"
+                                   FormatString="0.00"
+                                   HorizontalAlignment="Stretch"/>
+
+
+                    <ComboBox PlaceholderText="Категория" HorizontalAlignment="Stretch" Name="category">
+                        <ComboBoxItem Content="Продукты"/>
+                        <ComboBoxItem Content="Кафе и рестораны"/>
+                        <ComboBoxItem Content="Транспорт"/>
+                        <ComboBoxItem Content="Жилье и ЖКХ"/>
+                        <ComboBoxItem Content="Здоровье и аптеки"/>
+                        <ComboBoxItem Content="Одежда и обувь"/>
+                        <ComboBoxItem Content="Развлечения"/>
+                        <ComboBoxItem Content="Техника"/>
+                        <ComboBoxItem Content="Подарки"/>
+                        <ComboBoxItem Content="Прочее"/>
+                    </ComboBox>
+
+                    <Button Content="Добавить трату"
+                            Background="#10B981"
+                            Foreground="White"
+                            HorizontalAlignment="Stretch"
+                            HorizontalContentAlignment="Center"
+                            Margin="0,5,0,0"
+                            Click="AddWaste"/>
+                </StackPanel>
+            </Border>
+
+            <!-- ЦЕНТРАЛЬНАЯ КОЛОНКА: История транзакций -->
+            <!-- ЦЕНТРАЛЬНАЯ КОЛОНКА -->
+            <!-- ЦЕНТРАЛЬНАЯ КОЛОНКА: История транзакций растянута до низа -->
+            <!-- ЦЕНТРАЛЬНАЯ КОЛОНКА: История транзакций (Column="1") -->
+            <StackPanel Grid.Column="1"
+                        VerticalAlignment="Top"
+                        Spacing="10">
+
+                <!-- Заголовок: теперь он БЕЗ Canvas, компьютер сам поставит его по центру списка -->
+                <TextBlock Text="История транзакций"
+                           HorizontalAlignment="Center"
+                           FontSize="18"
+                           FontWeight="Bold"
+                           Margin="0,-45,0,0"/>
+
+                <!-- Список: уменьшили высоту, чтобы он стал короче и встал по линейке -->
+                <ListBox Name="HistoryListBox"
+                         Height="225"
+                         BorderBrush="#CBD5E1"
+                         BorderThickness="1"
+                         CornerRadius="0"
+                         Margin="10,-10,10,0">
+                </ListBox>
+            </StackPanel>
+
+
+
+
+            <!-- ПРАВАЯ КОЛОНКА: Пополнение баланса внутри черной рамки -->
+            <Border Grid.Column="2"
+                    BorderBrush="#CBD5E1"
+                    BorderThickness="1"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Top"
+                    Padding="10">
+                <StackPanel Spacing="10">
+                    <TextBlock Text="Пополнить баланс"
+                               FontSize="21"
+                               Height="75"
+                               HorizontalAlignment="Center"
+                               FontWeight="Bold"
+                               Margin="0,0,0,5"/>
+
+                    <!-- Исправлено: убрали Watermark, который ломал сборку -->
+                    <NumericUpDown Minimum="0"
+                                   Increment="100"
+                                   FormatString="0.00"
+                                   HorizontalAlignment="Stretch"
+                                   Name="EnterAddBalance"/>
+
+                    <Button Content="Пополнить баланс"
+                            Background="#2ECC71"
+                            Foreground="White"
+                            HorizontalAlignment="Stretch"
+                            HorizontalContentAlignment="Center"
+                            Click="AddBalance"/>
+
+                    <Button Content="Очистить всю историю"
+                            Background="#EF4444"
+                            Foreground="White"
+                            HorizontalAlignment="Stretch"
+                            HorizontalContentAlignment="Center"
+                            Click="DelHistory"/>
+                </StackPanel>
+            </Border>
+        </Grid>
+
+    </StackPanel>
+</Window>
