@@ -1,5 +1,6 @@
 # Finance Manager Application (Avalonia UI Edition) 💰
-<img width="1920" height="1080" alt="AvaloniaFinanceManager" src="https://github.com/user-attachments/assets/cb80e818-dccd-464e-bb98-23801c77adf9" />
+<img width="1920" height="1039" alt="AvaloniaFinanceManager" src="https://github.com/user-attachments/assets/c2f38041-ece8-4057-b7ba-853b8a0e64b8" />
+
 
 
 
