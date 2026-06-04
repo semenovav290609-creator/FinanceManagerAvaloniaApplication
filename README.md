@@ -1,5 +1,7 @@
 # Finance Manager Application (Avalonia UI Edition) 💰
-<img width="1444" height="754" alt="Снимок экрана 2026-06-03 204930" src="https://github.com/user-attachments/assets/192ad952-3e4e-46c2-ba10-ab0ce5865f4f" />
+<img width="1920" height="1080" alt="AvaloniaFinanceManager" src="https://github.com/user-attachments/assets/cb80e818-dccd-464e-bb98-23801c77adf9" />
+
+
 
 
 **Finance Manager** — это современное, легкое кроссплатформенное десктопное приложение для контроля личных финансов. Проект полностью переписан с устаревшей платформы Windows Forms на современный фреймворк **Avalonia UI**, что обеспечивает высокую производительность и гибкий UI.
