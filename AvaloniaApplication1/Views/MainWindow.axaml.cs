@@ -27,21 +27,31 @@ namespace AvaloniaApplication1.Views
         {
             InitializeComponent();
             LoadHistory();
+            LoadDreamState();
         }
 
         // 1. КНОПКА: ДОБАВИТЬ ТРАТУ
         private void AddWaste(object? sender, RoutedEventArgs e)
         {
             decimal waste = (decimal)(Price.Value ?? 0);
+            if (waste <= 0) return; // Защита от нулевых трат
+
             _currentBalance -= waste;
             _totalSpent += waste;
 
-            balance.Text = $"Общий баланс: {_currentBalance} ₽";
-            TotalSpent.Text = $"Итого потрачено: {_totalSpent} ₽";
+            balance.Text = $"Общий баланс: {_currentBalance:N2} ₽";
+            TotalSpent.Text = $"Итого потрачено: {_totalSpent:N2} ₽";
 
-            var nameBlock = new TextBlock { Text = NameWaste.Text, FontWeight = FontWeight.Bold, FontSize = 16 };
-            var categoryBlock = new TextBlock { Text = $"Категория: {category.Text}", FontSize = 12, Foreground = (IBrush)Brush.Parse("#7F8C8D") };
-            var priceBlock = new TextBlock { Text = $"-{waste} ₽", Foreground = (IBrush)Brush.Parse("#C0392B"), FontSize = 14 };
+            // Безопасное получение текста категории в Avalonia UI
+            string selectedCategory = "Прочее";
+            if (category.SelectedItem is ComboBoxItem item)
+            {
+                selectedCategory = item.Content?.ToString() ?? "Прочее";
+            }
+
+            var nameBlock = new TextBlock { Text = string.IsNullOrWhiteSpace(NameWaste.Text) ? "Без названия" : NameWaste.Text, FontWeight = FontWeight.Bold, FontSize = 16 };
+            var categoryBlock = new TextBlock { Text = $"Категория: {selectedCategory}", FontSize = 12, Foreground = (IBrush)Brush.Parse("#7F8C8D") };
+            var priceBlock = new TextBlock { Text = $"-{waste:N2} ₽", Foreground = (IBrush)Brush.Parse("#C0392B"), FontSize = 14 };
 
             var itemContainer = new StackPanel { Orientation = Orientation.Vertical, Margin = new Thickness(0, 0, 0, 12) };
             itemContainer.Children.Add(nameBlock);
@@ -50,10 +60,11 @@ namespace AvaloniaApplication1.Views
 
             HistoryListBox.Items.Add(itemContainer);
 
-            SaveHistory(); // Сохраняем уже в настоящем формате JSON
+            SaveHistory();
+            SaveDreamState();
 
             NameWaste.Text = string.Empty;
-            category.Text = string.Empty;
+            category.SelectedIndex = -1; // Сбрасываем выбор в ComboBox
             Price.Value = 0;
         }
 
@@ -62,7 +73,9 @@ namespace AvaloniaApplication1.Views
         {
             _currentBalance += (decimal)(EnterAddBalance.Value ?? 0);
             balance.Text = $"Общий баланс: {_currentBalance} ₽";
+            SaveDreamState();
             EnterAddBalance.Value = 0;
+
         }
 
         // 3. КНОПКА: ОЧИСТИТЬ ВСЮ ИСТОРИЮ
@@ -100,7 +113,7 @@ namespace AvaloniaApplication1.Views
                 WriteIndented = true,
                 Encoder = System.Text.Encodings.Web.JavaScriptEncoder.Create(System.Text.Unicode.UnicodeRanges.All)
             });
-            
+
             File.WriteAllText("history.json", jsonString);
         }
 
@@ -146,5 +159,134 @@ namespace AvaloniaApplication1.Views
                 // Если файл JSON поврежден, программа просто не упадет при старте
             }
         }
+
+        private string _dreamName = "";
+        private decimal _dreamTarget = 0;
+        private decimal _dreamCurrent = 0;
+
+        // КНОПКА: УСТАНОВИТЬ ЦЕЛЬ (Кнопка "ОК")
+        private void SaveDreamGoal(object? sender, RoutedEventArgs e)
+        {
+            _dreamName = string.IsNullOrWhiteSpace(DreamNameInput.Text) ? "Моя мечта" : DreamNameInput.Text;
+            _dreamTarget = (decimal)(DreamTargetInput.Value ?? 0);
+
+            UpdateDreamUI();
+            SaveDreamState();
+        }
+
+        // КНОПКА: ВЛОЖИТЬ ДЕНЬГИ В КОПИЛКУ (Кнопка "Вложить")
+        private void InvestInDream(object? sender, RoutedEventArgs e)
+        {
+            decimal amount = (decimal)(DreamInvestInput.Value ?? 0);
+
+            // Проверки: сумма > 0, денег хватает на балансе, цель вообще создана
+            if (amount <= 0 || amount > _currentBalance || _dreamTarget <= 0) return;
+
+            _currentBalance -= amount; // Вычитаем из основного баланса
+            _dreamCurrent += amount;   // Переносим в копилку
+
+            // Обновляем строку баланса на экране
+            balance.Text = $"Общий баланс: {_currentBalance:N2} ₽";
+
+            UpdateDreamUI();
+            SaveDreamState();
+
+            DreamInvestInput.Value = 0; // Сбрасываем счетчик ввода
+        }
+
+        // КНОПКА: СБРОСИТЬ КОПИЛКУ (Кнопка "Сброс")
+        private void ResetDream(object? sender, RoutedEventArgs e)
+        {
+            // Возвращаем накопленные деньги обратно на счет перед удалением цели
+            _currentBalance += _dreamCurrent;
+            balance.Text = $"Общий баланс: {_currentBalance:N2} ₽";
+
+            _dreamName = "";
+            _dreamTarget = 0;
+            _dreamCurrent = 0;
+
+            // Очищаем текстовые поля ввода
+            DreamNameInput.Text = string.Empty;
+            DreamTargetInput.Value = 0;
+            DreamInvestInput.Value = 0;
+
+            UpdateDreamUI();
+            SaveDreamState();
+        }
+
+        // Обновление текстов копилки и прогресс-бара на экране
+        private void UpdateDreamUI()
+        {
+            if (_dreamTarget > 0)
+            {
+                decimal leftToSave = _dreamTarget - _dreamCurrent;
+                if (leftToSave < 0) leftToSave = 0;
+
+                DreamTitleText.Text = $"Накопления: {_dreamName}";
+                DreamProgressText.Text = $"Собрано: {_dreamCurrent:N2} ₽ из {_dreamTarget:N2} ₽";
+                DreamLeftText.Text = leftToSave > 0 ? $"Осталось накопить: {leftToSave:N2} ₽" : "🎉 Ура! Цель достигнута!";
+
+                // Процент для полосы прогресса
+                DreamProgressBar.Value = (double)((_dreamCurrent / _dreamTarget) * 100);
+            }
+            else
+            {
+                DreamTitleText.Text = "Накопления на мечту";
+                DreamProgressText.Text = "Задайте цель и сумму";
+                DreamLeftText.Text = "Осталось накопить: 0 ₽";
+                DreamProgressBar.Value = 0;
+            }
+        }
+
+        // Сохранение состояния копилки в JSON
+        private void SaveDreamState()
+        {
+            var data = new Dictionary<string, string>
+    {
+        { "Name", _dreamName },
+        { "Target", _dreamTarget.ToString() },
+        { "Current", _dreamCurrent.ToString() },
+        { "MainBalance", _currentBalance.ToString() } // <-- ДОБАВИЛИ СТРОКУ
+    };
+            string json = JsonSerializer.Serialize(data);
+            File.WriteAllText("dream.json", json);
+        }
+
+        // Последний метод загрузки состояния копилки
+        // Загрузка состояния копилки И текущего баланса
+        private void LoadDreamState()
+        {
+            if (!File.Exists("dream.json")) return;
+            try
+            {
+                string json = File.ReadAllText("dream.json");
+                var data = JsonSerializer.Deserialize<Dictionary<string, string>>(json);
+                if (data != null)
+                {
+                    _dreamName = data.GetValueOrDefault("Name", "");
+                    decimal.TryParse(data.GetValueOrDefault("Target", "0"), out _dreamTarget);
+                    decimal.TryParse(data.GetValueOrDefault("Current", "0"), out _dreamCurrent);
+
+                    // Читаем баланс из файла. Если файла нет — останется 0
+                    decimal.TryParse(data.GetValueOrDefault("MainBalance", "0"), out _currentBalance);
+
+                    DreamNameInput.Text = _dreamName;
+                    DreamTargetInput.Value = (decimal)_dreamTarget;
+
+                    // Обновляем текст баланса на экране при старте
+                    balance.Text = $"Общий баланс: {_currentBalance:N2} ₽";
+
+                    UpdateDreamUI();
+                }
+            }
+            catch { }
+        }
+
     }
 }
+
+
+
+
+
+

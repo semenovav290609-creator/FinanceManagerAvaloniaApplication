@@ -16,33 +16,42 @@
     <!-- Главный вертикальный контейнер -->
     <StackPanel VerticalAlignment="Top" Spacing="15">
 
-        <!-- Главный заголовок -->
-        <TextBlock TextAlignment="Center"
-                   FontSize="40"
-                   Text="Менеджер финансов"
-                   FontStyle="Oblique"
-                   Background="#1E293B"
-                   Foreground="White"/>
+        <!-- Главный заголовок в круглой рамке -->
+        <Border Background="#1E293B" 
+        CornerRadius="10" 
+        Margin="15,15,15,0" 
+        Padding="10" 
+        ClipToBounds="True">
+    <TextBlock TextAlignment="Center"
+               FontSize="36"
+               Text="Менеджер финансов"
+               FontWeight="SemiBold"
+               Foreground="White"/>
+</Border>
 
         <!-- Блок баланса и трат (на одной строке) -->
         <Grid Margin="15,0,15,0">
             <!-- Левый блок: Общий баланс -->
-            <TextBlock HorizontalAlignment="Left"
-                       TextAlignment="Left"
-                       Text="Общий баланс 0₽"
-                       FontSize="32"
-                       Background="#E8F8F5"
-                       Foreground="#117A65"
-                       Name="balance"/>
+            <Viewbox HorizontalAlignment="Left" StretchDirection="DownOnly" Height="50">
+                <Border Background="#E8F8F5" CornerRadius="20" ClipToBounds="True" Padding="10,0,10,0">
+                    <TextBlock TextAlignment="Left"
+                               Text="Общий баланс 0₽"
+                               FontSize="32"
+                               Foreground="#117A65"
+                               Name="balance"/>
+                </Border>
+            </Viewbox>
 
             <!-- Правый блок: Итого потрачено -->
-            <TextBlock Text="Итого потрачено 0₽"
-                       HorizontalAlignment="Right"
-                       TextAlignment="Left"
-                       FontSize="28"
-                       Background="#FADBD8"
-                       Foreground="#78281F"
-                       Name="TotalSpent"/>
+            <Viewbox HorizontalAlignment="Right" StretchDirection="DownOnly" Height="45">
+                <Border Background="#FADBD8" CornerRadius="20" ClipToBounds="True" Padding="10,0,10,0">
+                    <TextBlock TextAlignment="Left"
+                               Text="Итого потрачено 0₽"
+                               FontSize="28"
+                               Foreground="#78281F"
+                               Name="TotalSpent"/>
+                </Border>
+            </Viewbox>
         </Grid>
 
         <!-- Основная рабочая сетка из трех колонок -->
@@ -59,7 +68,8 @@
                     BorderThickness="1"
                     HorizontalAlignment="Stretch"
                     VerticalAlignment="Top"
-                    Padding="10">
+                    Padding="10"
+                    CornerRadius="20">
                 <StackPanel Spacing="10">
                     <TextBlock Text="Добавить новую трату"
                                FontSize="21"
@@ -69,16 +79,17 @@
 
                     <TextBox Watermark="Название траты"
                              HorizontalAlignment="Stretch"
+                             CornerRadius="20"
                              Name="NameWaste"/>
-                   
+
                     <NumericUpDown Name="Price"
                                    Minimum="0"
                                    Increment="10"
                                    FormatString="0.00"
+                                   CornerRadius="20"
                                    HorizontalAlignment="Stretch"/>
 
-
-                    <ComboBox PlaceholderText="Категория" HorizontalAlignment="Stretch" Name="category">
+                    <ComboBox PlaceholderText="Категория" HorizontalAlignment="Stretch" CornerRadius="20" Name="category">
                         <ComboBoxItem Content="Продукты"/>
                         <ComboBoxItem Content="Кафе и рестораны"/>
                         <ComboBoxItem Content="Транспорт"/>
@@ -96,32 +107,32 @@
                             Foreground="White"
                             HorizontalAlignment="Stretch"
                             HorizontalContentAlignment="Center"
+                            CornerRadius="20"
                             Margin="0,5,0,0"
                             Click="AddWaste"/>
                 </StackPanel>
             </Border>
-           
+
+            <!-- ЦЕНТРАЛЬНАЯ КОЛОНКА: История транзакций -->
             <StackPanel Grid.Column="1"
                         VerticalAlignment="Top"
                         Spacing="10">
-               
+
                 <TextBlock Text="История транзакций"
                            HorizontalAlignment="Center"
                            FontSize="18"
                            FontWeight="Bold"
                            Margin="0,-45,0,0"/>
-               
+
                 <ListBox Name="HistoryListBox"
                          Height="225"
                          BorderBrush="#CBD5E1"
                          BorderThickness="1"
-                         CornerRadius="0"
+                         CornerRadius="20"
+                         ClipToBounds="True"
                          Margin="10,-10,10,0">
                 </ListBox>
             </StackPanel>
-
-
-
 
             <!-- ПРАВАЯ КОЛОНКА: Пополнение баланса внутри черной рамки -->
             <Border Grid.Column="2"
@@ -129,6 +140,7 @@
                     BorderThickness="1"
                     HorizontalAlignment="Stretch"
                     VerticalAlignment="Top"
+                    CornerRadius="20"
                     Padding="10">
                 <StackPanel Spacing="10">
                     <TextBlock Text="Пополнить баланс"
@@ -137,11 +149,12 @@
                                HorizontalAlignment="Center"
                                FontWeight="Bold"
                                Margin="0,0,0,5"/>
-                   
+
                     <NumericUpDown Minimum="0"
                                    Increment="100"
                                    FormatString="0.00"
                                    HorizontalAlignment="Stretch"
+                                   CornerRadius="20"
                                    Name="EnterAddBalance"/>
 
                     <Button Content="Пополнить баланс"
@@ -149,6 +162,7 @@
                             Foreground="White"
                             HorizontalAlignment="Stretch"
                             HorizontalContentAlignment="Center"
+                            CornerRadius="20"
                             Click="AddBalance"/>
 
                     <Button Content="Очистить всю историю"
@@ -156,10 +170,39 @@
                             Foreground="White"
                             HorizontalAlignment="Stretch"
                             HorizontalContentAlignment="Center"
+                            CornerRadius="20"
                             Click="DelHistory"/>
                 </StackPanel>
             </Border>
         </Grid>
+
+        <!-- Нижний блок накоплений -->
+        <Border BorderBrush="#CBD5E1"
+                BorderThickness="1"
+                CornerRadius="20"
+                Margin="15,0,15,15"
+                Padding="15">
+            <StackPanel Spacing="10">
+                <!-- Название и прогресс -->
+                <TextBlock Name="DreamTitleText" Text="Накопления на мечту" FontSize="20" FontWeight="Bold"/>
+                <TextBlock Name="DreamProgressText" Text="Собрано: 0 ₽ из 0 ₽" FontSize="14" Foreground="#7F8C8D"/>
+                <TextBlock Name="DreamLeftText" Text="Осталось накопить: 0 ₽" FontSize="14" FontWeight="SemiBold" Foreground="#2980B9"/>
+                
+                <!-- Полоса прогресса -->
+                <ProgressBar Name="DreamProgressBar" Minimum="0" Maximum="100" Value="0" Height="12" CornerRadius="20" Foreground="#3498DB"/>
+
+                <!-- Управление -->
+                <WrapPanel Orientation="Horizontal">
+                    <TextBox Watermark="Цель (например, PS5)" Width="180" CornerRadius="20" Margin="0,0,10,5" Name="DreamNameInput"/>
+                    <NumericUpDown Watermark="Сумма цели" Width="175" CornerRadius="20" Margin="0,0,10,5" Name="DreamTargetInput"/>
+                    <Button Content="ОК" Background="#3498DB" Foreground="White" CornerRadius="20" Margin="0,0,20,5" Click="SaveDreamGoal"/>
+                    
+                    <NumericUpDown Watermark="Вложить" Width="145" CornerRadius="20" Margin="0,0,10,5" Name="DreamInvestInput"/>
+                    <Button Content="Вложить" Background="#9B59B6" Foreground="White" CornerRadius="20" Margin="0,0,10,5" Click="InvestInDream"/>
+                    <Button Content="Сброс" Background="#7F8C8D" Foreground="White" CornerRadius="20" Margin="0,0,0,5" Click="ResetDream"/>
+                </WrapPanel>
+            </StackPanel>
+        </Border>
 
     </StackPanel>
 </Window>
