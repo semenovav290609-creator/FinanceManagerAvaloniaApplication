@@ -70,8 +70,7 @@
                     <TextBox Watermark="Название траты"
                              HorizontalAlignment="Stretch"
                              Name="NameWaste"/>
-
-                    <!-- Исправлено: убрали Watermark, который ломал сборку -->
+                   
                     <NumericUpDown Name="Price"
                                    Minimum="0"
                                    Increment="10"
@@ -101,23 +100,17 @@
                             Click="AddWaste"/>
                 </StackPanel>
             </Border>
-
-            <!-- ЦЕНТРАЛЬНАЯ КОЛОНКА: История транзакций -->
-            <!-- ЦЕНТРАЛЬНАЯ КОЛОНКА -->
-            <!-- ЦЕНТРАЛЬНАЯ КОЛОНКА: История транзакций растянута до низа -->
-            <!-- ЦЕНТРАЛЬНАЯ КОЛОНКА: История транзакций (Column="1") -->
+           
             <StackPanel Grid.Column="1"
                         VerticalAlignment="Top"
                         Spacing="10">
-
-                <!-- Заголовок: теперь он БЕЗ Canvas, компьютер сам поставит его по центру списка -->
+               
                 <TextBlock Text="История транзакций"
                            HorizontalAlignment="Center"
                            FontSize="18"
                            FontWeight="Bold"
                            Margin="0,-45,0,0"/>
-
-                <!-- Список: уменьшили высоту, чтобы он стал короче и встал по линейке -->
+               
                 <ListBox Name="HistoryListBox"
                          Height="225"
                          BorderBrush="#CBD5E1"
@@ -144,8 +137,7 @@
                                HorizontalAlignment="Center"
                                FontWeight="Bold"
                                Margin="0,0,0,5"/>
-
-                    <!-- Исправлено: убрали Watermark, который ломал сборку -->
+                   
                     <NumericUpDown Minimum="0"
                                    Increment="100"
                                    FormatString="0.00"
