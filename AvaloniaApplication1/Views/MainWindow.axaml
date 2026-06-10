@@ -1,4 +1,5 @@
 <Window xmlns="https://github.com/avaloniaui"
+        x:DataType="vm:MainWindowViewModel"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="using:AvaloniaApplication1.ViewModels"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -17,17 +18,17 @@
     <StackPanel VerticalAlignment="Top" Spacing="15">
 
         <!-- Главный заголовок в круглой рамке -->
-        <Border Background="#1E293B" 
-        CornerRadius="10" 
-        Margin="15,15,15,0" 
-        Padding="10" 
-        ClipToBounds="True">
-    <TextBlock TextAlignment="Center"
-               FontSize="36"
-               Text="Менеджер финансов"
-               FontWeight="SemiBold"
-               Foreground="White"/>
-</Border>
+        <Border Background="#1E293B"
+                CornerRadius="10"
+                Margin="15,15,15,0"
+                Padding="10"
+                ClipToBounds="True">
+            <TextBlock TextAlignment="Center"
+                       FontSize="36"
+                       Text="Менеджер финансов"
+                       FontWeight="SemiBold"
+                       Foreground="White"/>
+        </Border>
 
         <!-- Блок баланса и трат (на одной строке) -->
         <Grid Margin="15,0,15,0">
@@ -35,7 +36,7 @@
             <Viewbox HorizontalAlignment="Left" StretchDirection="DownOnly" Height="50">
                 <Border Background="#E8F8F5" CornerRadius="20" ClipToBounds="True" Padding="10,0,10,0">
                     <TextBlock TextAlignment="Left"
-                               Text="Общий баланс 0₽"
+                               Text="{Binding CurrentBalance, StringFormat='Общий баланс: {0:N2} ₽'}"
                                FontSize="32"
                                Foreground="#117A65"
                                Name="balance"/>
@@ -46,7 +47,7 @@
             <Viewbox HorizontalAlignment="Right" StretchDirection="DownOnly" Height="45">
                 <Border Background="#FADBD8" CornerRadius="20" ClipToBounds="True" Padding="10,0,10,0">
                     <TextBlock TextAlignment="Left"
-                               Text="Итого потрачено 0₽"
+                               Text="{Binding TotalSpent, StringFormat='Итого потрачено: {0:N2} ₽'}"
                                FontSize="28"
                                Foreground="#78281F"
                                Name="TotalSpent"/>
@@ -77,30 +78,47 @@
                                FontWeight="Bold"
                                Margin="0,0,0,5"/>
 
+                    <!-- 1. Название траты (привязываем к Text) -->
                     <TextBox Watermark="Название траты"
                              HorizontalAlignment="Stretch"
                              CornerRadius="20"
-                             Name="NameWaste"/>
+                             Text="{Binding NameWaste, Mode=TwoWay}"/>
 
-                    <NumericUpDown Name="Price"
-                                   Minimum="0"
+                    <!-- 2. Сумма траты (привязываем к Value) -->
+                    <!-- Примерно 88-93 строки -->
+                    <!-- 2. Сумма траты -->
+                    <NumericUpDown Minimum="0"
                                    Increment="10"
                                    FormatString="0.00"
                                    CornerRadius="20"
-                                   HorizontalAlignment="Stretch"/>
+                                   HorizontalAlignment="Stretch"
+                                   Value="{Binding Price, Mode=TwoWay}"/> <!-- Убрали UpdateSourceTrigger -->
 
-                    <ComboBox PlaceholderText="Категория" HorizontalAlignment="Stretch" CornerRadius="20" Name="category">
-                        <ComboBoxItem Content="Продукты"/>
-                        <ComboBoxItem Content="Кафе и рестораны"/>
-                        <ComboBoxItem Content="Транспорт"/>
-                        <ComboBoxItem Content="Жилье и ЖКХ"/>
-                        <ComboBoxItem Content="Здоровье и аптеки"/>
-                        <ComboBoxItem Content="Одежда и обувь"/>
-                        <ComboBoxItem Content="Развлечения"/>
-                        <ComboBoxItem Content="Техника"/>
-                        <ComboBoxItem Content="Подарки"/>
-                        <ComboBoxItem Content="Прочее"/>
-                    </ComboBox>
+                                   <!-- 3. Категория -->
+                                   <!-- 3. Категория -->
+                                   <ComboBox PlaceholderText="Категория"
+                                             HorizontalAlignment="Stretch"
+                                             CornerRadius="20"
+                                             SelectedIndex="9"
+                                             SelectedItem="{Binding SelectedCategory, Mode=TwoWay}">
+                                       <ComboBox.Items>
+                                           <x:String>Продукты</x:String>
+                                           <x:String>Кафе и рестораны</x:String>
+                                           <x:String>Транспорт</x:String>
+                                           <x:String>Жилье и ЖКХ</x:String>
+                                           <x:String>Здоровье и аптеки</x:String>
+                                           <x:String>Одежда и обувь</x:String>
+                                           <x:String>Развлечения</x:String>
+                                           <x:String>Техника</x:String>
+                                           <x:String>Подарки</x:String>
+                                           <x:String>Прочее</x:String>
+                                       </ComboBox.Items>
+                                   </ComboBox>
+
+
+
+
+
 
                     <Button Content="Добавить трату"
                             Background="#10B981"
@@ -109,7 +127,7 @@
                             HorizontalContentAlignment="Center"
                             CornerRadius="20"
                             Margin="0,5,0,0"
-                            Click="AddWaste"/>
+                            Command="{Binding AddWasteCommand}"/>
                 </StackPanel>
             </Border>
 
@@ -124,14 +142,27 @@
                            FontWeight="Bold"
                            Margin="0,-45,0,0"/>
 
-                <ListBox Name="HistoryListBox"
-                         Height="225"
+                <ListBox Height="225"
                          BorderBrush="#CBD5E1"
                          BorderThickness="1"
                          CornerRadius="20"
                          ClipToBounds="True"
-                         Margin="10,-10,10,0">
+                         Margin="10,-10,10,0"
+                         ItemsSource="{Binding History}">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Vertical" Margin="0,0,0,12">
+                                <!-- Название траты -->
+                                <TextBlock Text="{Binding Title}" FontWeight="Bold" FontSize="16" />
+                                <!-- Категория -->
+                                <TextBlock Text="{Binding Category, StringFormat='Категория: {0}'}" FontSize="12" Foreground="#7F8C8D" />
+                                <!-- Сумма -->
+                                <TextBlock Text="{Binding Amount, StringFormat='-{0:N2} ₽'}" Foreground="#C0392B" FontSize="14" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
                 </ListBox>
+
             </StackPanel>
 
             <!-- ПРАВАЯ КОЛОНКА: Пополнение баланса внутри черной рамки -->
@@ -150,12 +181,16 @@
                                FontWeight="Bold"
                                Margin="0,0,0,5"/>
 
+                    <!-- Поле ввода для пополнения баланса -->
                     <NumericUpDown Minimum="0"
                                    Increment="100"
                                    FormatString="0.00"
                                    HorizontalAlignment="Stretch"
                                    CornerRadius="20"
-                                   Name="EnterAddBalance"/>
+                                   Value="{Binding BalanceInput, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+
+
+
 
                     <Button Content="Пополнить баланс"
                             Background="#2ECC71"
@@ -163,7 +198,7 @@
                             HorizontalAlignment="Stretch"
                             HorizontalContentAlignment="Center"
                             CornerRadius="20"
-                            Click="AddBalance"/>
+                            Command="{Binding AddBalanceCommand}"/>
 
                     <Button Content="Очистить всю историю"
                             Background="#EF4444"
@@ -171,7 +206,7 @@
                             HorizontalAlignment="Stretch"
                             HorizontalContentAlignment="Center"
                             CornerRadius="20"
-                            Click="DelHistory"/>
+                            Command="{Binding DelHistoryCommand}"/>
                 </StackPanel>
             </Border>
         </Grid>
@@ -183,26 +218,31 @@
                 Margin="15,0,15,15"
                 Padding="15">
             <StackPanel Spacing="10">
-                <!-- Название и прогресс -->
-                <TextBlock Name="DreamTitleText" Text="Накопления на мечту" FontSize="20" FontWeight="Bold"/>
-                <TextBlock Name="DreamProgressText" Text="Собрано: 0 ₽ из 0 ₽" FontSize="14" Foreground="#7F8C8D"/>
-                <TextBlock Name="DreamLeftText" Text="Осталось накопить: 0 ₽" FontSize="14" FontWeight="SemiBold" Foreground="#2980B9"/>
-                
-                <!-- Полоса прогресса -->
-                <ProgressBar Name="DreamProgressBar" Minimum="0" Maximum="100" Value="0" Height="12" CornerRadius="20" Foreground="#3498DB"/>
+                <!-- Название и прогресс (теперь берут данные из ViewModel) -->
+                <TextBlock Name="DreamTitleText" Text="{Binding DreamTitle}" FontSize="20" FontWeight="Bold"/>
+                <TextBlock Name="DreamProgressText" Text="{Binding DreamProgress}" FontSize="14" Foreground="#7F8C8D"/>
+                <TextBlock Name="DreamLeftText" Text="{Binding DreamLeft}" FontSize="14" FontWeight="SemiBold" Foreground="#2980B9"/>
+
+                <!-- Полоса прогресса (связана с процентами) -->
+                <ProgressBar Name="DreamProgressBar" Minimum="0" Maximum="100" Value="{Binding DreamProgressPercent}" Height="12" CornerRadius="20" Foreground="#3498DB"/>
 
                 <!-- Управление -->
                 <WrapPanel Orientation="Horizontal">
-                    <TextBox Watermark="Цель (например, PS5)" Width="180" CornerRadius="20" Margin="0,0,10,5" Name="DreamNameInput"/>
-                    <NumericUpDown Watermark="Сумма цели" Width="175" CornerRadius="20" Margin="0,0,10,5" Name="DreamTargetInput"/>
-                    <Button Content="ОК" Background="#3498DB" Foreground="White" CornerRadius="20" Margin="0,0,20,5" Click="SaveDreamGoal"/>
-                    
-                    <NumericUpDown Watermark="Вложить" Width="145" CornerRadius="20" Margin="0,0,10,5" Name="DreamInvestInput"/>
-                    <Button Content="Вложить" Background="#9B59B6" Foreground="White" CornerRadius="20" Margin="0,0,10,5" Click="InvestInDream"/>
-                    <Button Content="Сброс" Background="#7F8C8D" Foreground="White" CornerRadius="20" Margin="0,0,0,5" Click="ResetDream"/>
+                    <!-- Поля ввода ( Mode=TwoWay мгновенно передает текст/числа в C# ) -->
+                    <TextBox Watermark="Цель (например, PS5)" Width="180" CornerRadius="20" Margin="0,0,10,5" Name="DreamNameInput" Text="{Binding DreamName, Mode=TwoWay}"/>
+                    <NumericUpDown Watermark="Сумма цели" Width="175" CornerRadius="20" Margin="0,0,10,5" Name="DreamTargetInput" Value="{Binding DreamTarget, Mode=TwoWay}"/>
+
+                    <!-- Кнопка ОК -->
+                    <Button Content="ОК" Background="#3498DB" Foreground="White" CornerRadius="20" Margin="0,0,20,5" Command="{Binding SaveDreamGoalCommand}"/>
+
+                    <!-- Поле вложить и кнопки -->
+                    <NumericUpDown Watermark="Вложить" Width="145" CornerRadius="20" Margin="0,0,10,5" Name="DreamInvestInput" Value="{Binding DreamInvest, Mode=TwoWay}"/>
+                    <Button Content="Вложить" Background="#9B59B6" Foreground="White" CornerRadius="20" Margin="0,0,10,5" Command="{Binding InvestInDreamCommand}"/>
+                    <Button Content="Сброс" Background="#7F8C8D" Foreground="White" CornerRadius="20" Margin="0,0,0,5" Command="{Binding ResetDreamCommand}"/>
                 </WrapPanel>
             </StackPanel>
         </Border>
+
 
     </StackPanel>
 </Window>
